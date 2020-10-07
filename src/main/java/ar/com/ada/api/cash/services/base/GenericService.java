@@ -40,4 +40,9 @@ public class GenericService<T> implements IService<T> {
         return entity;
     }
 
+    @Override
+    public long count() {
+        return repository.count();
+    }
+
 }

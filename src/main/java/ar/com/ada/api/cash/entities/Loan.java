@@ -3,9 +3,8 @@ package ar.com.ada.api.cash.entities;
 import java.math.BigDecimal;
 
 import javax.persistence.*;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+
+import com.fasterxml.jackson.annotation.*;
 
 @Entity
 @Table(name = "loan")
@@ -17,6 +16,10 @@ public class Loan {
     private BigDecimal total;
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    @JsonProperty("userId")
+
     private User user;
 
     public Integer getId() {
@@ -43,12 +46,4 @@ public class Loan {
         this.user = user;
     }
 
-    public Loan() {
-    }
-
-    public Loan(Integer id, BigDecimal total, User user) {
-        this.id = id;
-        this.total = total;
-        this.user = user;
-    }
 }

@@ -14,4 +14,6 @@ public interface IService<T> {
 
     boolean delete(T entity);
 
+    long count();
+
 }
