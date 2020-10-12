@@ -1,17 +1,27 @@
 package ar.com.ada.api.cash.services;
 
 import ar.com.ada.api.cash.entities.*;
+import ar.com.ada.api.cash.entities.reports.LoanFrankReport;
 import ar.com.ada.api.cash.repos.LoanRepository;
 import ar.com.ada.api.cash.services.base.GenericService;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 public class LoanService extends GenericService<Loan> {
+
+    @Autowired
+    SessionFactory sessionFactory;
 
     private LoanRepository repo() {
         return (LoanRepository) repository;
@@ -76,6 +86,58 @@ public class LoanService extends GenericService<Loan> {
 
     public long countByUserId(Integer userId) {
         return this.repo().countByUserId(userId);
+    }
+
+    /**
+     * Con este metodo ejecuto el SP, recorro los items(LoanFrankReport) y lo
+     * transformamos a un LOAN.
+     * 
+     * @return
+     */
+
+    public List<Loan> getAllUsingSP() {
+
+        // ATENCION: ESTE CODIGO NO ESTA PROBADO, hacer un controller en tal caso.
+
+        List<Loan> resultado = new ArrayList<>();
+        List<LoanFrankReport> resultadoSP = new ArrayList<>();
+
+        resultado = resultadoSP.stream().map(r -> {
+            Loan l = new Loan();
+            l.setId(r.getLoan_id());
+            l.setTotal(r.getTotal());
+            User user = new User();
+            user.setId(r.getUser_id());
+            user.setEmail(r.getEmail());
+            user.setFirstName(r.getFirst_name());
+            user.setLastName(r.getLast_name());
+            user.addLoan(l);
+            return l;
+        }).collect(Collectors.toList());
+
+        return resultado;
+
+    }
+
+    public List<Loan> getAllUsingSPVersionAntigua() {
+
+        // ATENCION!!!: PSEUDOCODIGO: No necesariamente es un codigo funcional
+
+        Session s = sessionFactory.openSession();
+        Query q = s.createQuery("CALL GET_ALL_LOANS()");
+
+        // Recorrer el result List(que era una lista de lista de objetos)
+
+        List<List<Object>> rawData = q.getResultList();
+
+        // Estoy en la fila 1(o sea 0), item 3, que es la columa 4 que es el firstName
+        String firstName = rawData.get(0).get(3).toString();
+        List<Loan> resultado = new ArrayList<>();
+
+        // RECORRER el rawdata y andar leyendo los items. Usar el watch para ver el
+        // formato.
+        return resultado;
+
     }
 
 }

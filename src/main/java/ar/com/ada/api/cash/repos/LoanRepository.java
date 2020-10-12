@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.query.Procedure;
 
 import ar.com.ada.api.cash.entities.*;
+import ar.com.ada.api.cash.entities.reports.LoanFrankReport;
+
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -19,4 +22,9 @@ public interface LoanRepository extends JpaRepository<Loan, Integer> {
 
     @Query("select count(lo) from Loan lo where lo.user.id = :userId")
     long countByUserId(Integer userId);
+
+    //@Query(value = "CALL GET_ALL_LOANS()", nativeQuery =  true)
+    @Procedure("GET_ALL_LOANS")
+    List<LoanFrankReport> findAllLoansUsingStoredProcedure();
+
 }
